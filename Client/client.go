@@ -15,7 +15,7 @@ import (
 const REG_EXP = `<a href=\"\d*-\d*-\d*`
 const MALSHARE_URL = `http://www.malshare.com/daily/`
 
-var HASH_TYPE = [3]string{".sha1", ".sha256", ""}
+var HASH_TYPE = [3]string{"sha1", "sha256", ""}
 
 type HashData struct {
 	Hash    string    `json:"hash"`
@@ -63,9 +63,12 @@ func getLinkList() []string {
 }
 
 func getData(date, dataType string, socket *zmq4.Socket) {
-
+	prefix := "."
 	url := "http://www.malshare.com/daily/{{date}}/malshare_fileList.{{date}}{{dataType}}.txt"
-	url = strings.Replace(strings.Replace(url, "{{date}}", date, -1), "{{dataType}}", dataType, -1)
+	if dataType == "" {
+		prefix = ""
+	}
+	url = strings.Replace(strings.Replace(url, "{{date}}", date, -1), "{{dataType}}", prefix +  dataType, -1)
 
 	fmt.Println("Crawl :", url)
 
@@ -87,7 +90,7 @@ func getData(date, dataType string, socket *zmq4.Socket) {
 		currentData := red.Text()
 
 		newData, _ := json.Marshal(HashData{Hash: currentData, Type: dataType, Created: time.Now(), Desc: "Crawl from malshare"})
-		socket.Send(string(newData),0)
+		socket.SendBytes(newData,0)
 		fmt.Println(currentData, dataType)
 	}
 
@@ -101,14 +104,20 @@ func main() {
 
 	pub, _ := context.NewSocket(zmq4.PUB)
 
-	pub.Bind("tcp://*:5555")
+	pub.Connect("tcp://localhost:5555")
 
-	for _, v := range list {
-		//getData(v, `sha1`)
+
+
+
+	for i, v := range list {
+		if i > 20 {
+			return
+		}
+
 		for _, t := range HASH_TYPE {
 			getData(v, t, pub)
 		}
-		return
+		//return
 	}
 
 }
