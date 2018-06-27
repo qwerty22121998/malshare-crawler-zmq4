@@ -98,26 +98,29 @@ func getData(date, dataType string, socket *zmq4.Socket) {
 
 func main() {
 	//fmt.Println(getLinkList())
-	list := getLinkList()
+	//list := getLinkList()
 
 	context, _ := zmq4.NewContext()
 
 	pub, _ := context.NewSocket(zmq4.PUB)
 
-	pub.Connect("tcp://localhost:5555")
+	pub.Connect("tcp://10.3.15.123:5555")
 
-
-
-
-	for i, v := range list {
-		if i > 20 {
-			return
-		}
-
-		for _, t := range HASH_TYPE {
-			getData(v, t, pub)
-		}
-		//return
+	time.Sleep(100 * time.Millisecond)
+	for i := 0; i < 10; i++ {
+		pub.Send(fmt.Sprintf("%d", i), 0)
 	}
+
+	time.Sleep(100*time.Millisecond)
+	//for i, v := range list {
+	//	if i > 2 {
+	//		return
+	//	}
+	//
+	//	for _, t := range HASH_TYPE {
+	//		getData(v, t, pub)
+	//	}
+	//	//return
+	//}
 
 }

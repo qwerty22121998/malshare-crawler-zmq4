@@ -68,6 +68,7 @@ func main() {
 
 	for {
 		obj, _ := sub.RecvBytes(0)
+		fmt.Println(obj)
 		saveToDB(c, obj)
 	}
 
