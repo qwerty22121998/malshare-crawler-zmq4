@@ -1,0 +1,22 @@
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server>Finished running tool: /home/khanhvu2212/go/bin/golint
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server/server.go:11: don't use ALL_CAPS in Go names; use CamelCase
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server/server.go:11: exported const DB_NAME should have comment or be unexported
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server/server.go:12: don't use ALL_CAPS in Go names; use CamelCase
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server/server.go:12: exported const C_NAME should have comment or be unexported
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server/server.go:14: exported type HashData should have comment or be unexported
+
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server>Finished running tool: /usr/local/go/bin/go vet ./...
+
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server>Finished running tool: /usr/local/go/bin/go build -i -o /tmp/go-code-check.2087962915 github.com/qwerty22121998/malshare-crawler-zmq4/Server
+
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server>Finished running tool: /home/khanhvu2212/go/bin/golint
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server/server.go:12: don't use ALL_CAPS in Go names; use CamelCase
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server/server.go:12: exported const DB_NAME should have comment or be unexported
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server/server.go:13: don't use ALL_CAPS in Go names; use CamelCase
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server/server.go:13: exported const C_NAME should have comment or be unexported
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server/server.go:15: exported type HashData should have comment or be unexported
+
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server>Finished running tool: /usr/local/go/bin/go vet ./...
+
+/home/khanhvu2212/go/src/github.com/qwerty22121998/malshare-crawler-zmq4/Server>Finished running tool: /usr/local/go/bin/go build -i -o /tmp/go-code-check.2087962915 github.com/qwerty22121998/malshare-crawler-zmq4/Server
+

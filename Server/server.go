@@ -1,10 +1,11 @@
 package main
 
 import (
-	"zmq4"
+	"encoding/json"
 	"fmt"
 	"time"
-	"encoding/json"
+
+	"github.com/pebbe/zmq4"
 	"gopkg.in/mgo.v2"
 )
 
@@ -18,10 +19,10 @@ type HashData struct {
 	Desc    string    `json:"desc" bson:"desc"`
 }
 
-func saveToDB(collection *mgo.Collection, jsonData []byte) {
+func saveToDB(collection *mgo.Collection, jsonData string) {
 	var data HashData
-
-	e := json.Unmarshal(jsonData, &data)
+	fmt.Println(jsonData)
+	e := json.Unmarshal([]byte(jsonData), &data)
 	if e != nil {
 		return
 	}
@@ -57,18 +58,14 @@ func main() {
 		return
 	}
 	c := getCollections(s)
-
 	context, _ := zmq4.NewContext()
-
 	sub, _ := context.NewSocket(zmq4.SUB)
-
 	sub.SetSubscribe("")
-
 	sub.Bind("tcp://*:5555")
 
 	for {
-		obj, _ := sub.RecvBytes(0)
-		fmt.Println(obj)
+		obj, _ := sub.Recv(0)
+		//fmt.Println(obj)
 		saveToDB(c, obj)
 	}
 

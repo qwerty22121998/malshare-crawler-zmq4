@@ -1,27 +1,37 @@
 package main
 
 import (
-	"regexp"
-	"net/http"
+	"bufio"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"regexp"
 	"strings"
-	"bufio"
-	"zmq4"
 	"time"
+
 	"github.com/gin-gonic/gin/json"
+	"github.com/pebbe/zmq4"
 )
 
 const REG_EXP = `<a href=\"\d*-\d*-\d*`
 const MALSHARE_URL = `http://www.malshare.com/daily/`
 
 var HASH_TYPE = [3]string{"sha1", "sha256", ""}
+var cnt = 0
+var mp map[string]bool
+
+type HashDatas struct {
+	List []File
+}
 
 type HashData struct {
-	Hash    string    `json:"hash"`
-	Type    string    `json:"type"`
-	Created time.Time `json:"created"`
-	Desc    string    `json:"desc"`
+	Hash   string `json:"hash"`
+	Type   string `json:"type"`
+	Source string `json:"source"`
+}
+
+type File struct {
+	File []HashData `json:"file"`
 }
 
 func getBody() string {
@@ -62,19 +72,11 @@ func getLinkList() []string {
 
 }
 
-func getData(date, dataType string, socket *zmq4.Socket) {
-	prefix := "."
-	url := "http://www.malshare.com/daily/{{date}}/malshare_fileList.{{date}}{{dataType}}.txt"
-	if dataType == "" {
-		prefix = ""
-	}
-	url = strings.Replace(strings.Replace(url, "{{date}}", date, -1), "{{dataType}}", prefix +  dataType, -1)
+func getDataAll(date string, socket *zmq4.Socket) {
+
+	url := fmt.Sprintf("http://www.malshare.com/daily/%s/malshare_fileList.%s.all.txt", date, date)
 
 	fmt.Println("Crawl :", url)
-
-	if dataType == "" {
-		dataType = "md5"
-	}
 
 	resp, e := http.Get(url)
 
@@ -85,42 +87,57 @@ func getData(date, dataType string, socket *zmq4.Socket) {
 	}
 
 	red := bufio.NewScanner(resp.Body)
-
+	listHashs := HashDatas{}
 	for red.Scan() {
 		currentData := red.Text()
 
-		newData, _ := json.Marshal(HashData{Hash: currentData, Type: dataType, Created: time.Now(), Desc: "Crawl from malshare"})
-		socket.SendBytes(newData,0)
-		fmt.Println(currentData, dataType)
+		hashs := strings.Split(currentData, "	")
+		hashdatas := make([]HashData, 0)
+		types := []string{"md5", "sha1", "sha256"}
+		for i := range types {
+			if hashs[i] == "NULL" {
+				continue
+			}
+			if !mp[hashs[i]] {
+				mp[hashs[i]] = true
+				cnt++
+			}
+			hashdatas = append(hashdatas, HashData{Hash: hashs[i], Type: types[i], Source: "Malshare"})
+			// cnt++
+		}
+
+		listHashs.List = append(listHashs.List, File{hashdatas})
+		// cnt++
+
+		//newData, _ := json.Marshal(File{List: hashdatas})
+
+		//socket.Send(string(newData), 0)
+
 	}
+
+	newData, _ := json.Marshal(listHashs.List)
+	socket.Send(string(newData), 0)
 
 }
 
 func main() {
-	//fmt.Println(getLinkList())
-	//list := getLinkList()
+	fmt.Println(getLinkList())
+	list := getLinkList()
+	mp = make(map[string]bool)
 
 	context, _ := zmq4.NewContext()
-
-	pub, _ := context.NewSocket(zmq4.PUB)
-
-	pub.Connect("tcp://10.3.15.123:5555")
+	pub, _ := context.NewSocket(zmq4.PUSH)
+	pub.Connect("tcp://127.0.0.1:5555")
 
 	time.Sleep(100 * time.Millisecond)
-	for i := 0; i < 10; i++ {
-		pub.Send(fmt.Sprintf("%d", i), 0)
+	for i, v := range list {
+		if i > 3 {
+			fmt.Println(cnt)
+			// pub.Send("OK", 0)
+			break
+		}
+		getDataAll(v, pub)
 	}
 
-	time.Sleep(100*time.Millisecond)
-	//for i, v := range list {
-	//	if i > 2 {
-	//		return
-	//	}
-	//
-	//	for _, t := range HASH_TYPE {
-	//		getData(v, t, pub)
-	//	}
-	//	//return
-	//}
-
+	time.Sleep(1000 * time.Millisecond)
 }
